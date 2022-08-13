@@ -101,6 +101,6 @@ def exercise_four():
             cv.waitKey(0)
 
 
-#exercise_one()
+exercise_one()
 # exercise_three()
 #exercise_four()
