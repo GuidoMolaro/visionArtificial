@@ -28,8 +28,15 @@ def denoise(img):
 
 def contours(binary, img):
     contours, hierarchy = cv.findContours(binary, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
-    # contours = [cnt1, cnt2, cnt3]
-    cv.drawContours(img, contours, -1, (0, 0, 255), 3)
+
+    #cv.drawContours(img, contours, -1, (0, 0, 255), 3)
+    #cv.imshow("Rayo", img)
+    for i in contours:
+        area = cv.contourArea(i)
+        if area > 1000:
+            cv.drawContours(img, i, -1, (255,0,255),7)
+            peri = cv.arcLength(i, True)
+            approx = cv.approxPolyDP(i,0.02 * peri, True)
     cv.imshow("Rayo", img)
 
 while True:
