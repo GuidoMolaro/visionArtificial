@@ -26,7 +26,11 @@ def denoise(img):
     tempImg = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
     return cv.morphologyEx(tempImg,cv.MORPH_CLOSE, kernel)
 
-
+def contours(binary, img):
+    contours, hierarchy = cv.findContours(binary, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
+    # contours = [cnt1, cnt2, cnt3]
+    cv.drawContours(img, contours, -1, (0, 0, 255), 3)
+    cv.imshow("Rayo", img)
 
 while True:
     tecla = cv.waitKey(30)
@@ -38,5 +42,7 @@ while True:
 
     denoisedImg = denoise(binaryImg)
     cv.imshow('denoised',denoisedImg)
+
+    contours(denoisedImg,img)
     if tecla == 27:
         break
