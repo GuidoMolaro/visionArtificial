@@ -22,7 +22,7 @@ def erosion(img):
     return cv.erode(img,kernel,iterations=1)
 
 def denoise(img, val1, val2): #TODO: el diam de el kernel
-    kernel = cv.getStructuringElement(cv.MORPH_RECT,(val1, val2))
+    kernel = cv.getStructuringElement(cv.MORPH_RECT,(val1+1, val2+1))
     tempImg = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
     return cv.morphologyEx(tempImg,cv.MORPH_CLOSE, kernel)
 
@@ -43,7 +43,7 @@ def main():
     cv.namedWindow('binary')
     cv.createTrackbar('Thresh', 'binary', 0, 255, setBinary)
     cv.namedWindow('denoised')
-    cv.createTrackbar('KSize', 'denoised', 1, 5, denoise)
+    cv.createTrackbar('KSize', 'denoised', 0, 5, denoise)
     while True:
         tecla = cv.waitKey(30)
         ret, img = webcam.read()
@@ -54,8 +54,8 @@ def main():
         binaryImg = setBinary(img, val)
         cv.imshow('binary', binaryImg)
 
-        val1, val2 = cv.getTrackbarPos('KSize', 'denoised')
-        denoisedImg = denoise(binaryImg, val1, val2)
+        val1 = cv.getTrackbarPos('KSize', 'denoised')
+        denoisedImg = denoise(binaryImg, val1, val1)
         cv.imshow('denoised',denoisedImg)
 
         contours(denoisedImg,img)
