@@ -4,7 +4,7 @@
 #Erosionar
 #Aplicar opening y closing consecutivamente, para filtrar ruidos
 import cv2 as cv
-webcam = cv.VideoCapture(0)
+webcam = cv.VideoCapture(1)
 
 def setBinary(image,val):
     imWebcam = image
@@ -39,17 +39,20 @@ def contours(binary, img):
             approx = cv.approxPolyDP(i,0.02 * peri, True)
     cv.imshow("Rayo", img)
 
-while True:
-    tecla = cv.waitKey(30)
-    ret, img = webcam.read()
-    cv.imshow('webcam',img)
+def main():
+    while True:
+        tecla = cv.waitKey(30)
+        ret, img = webcam.read()
+        cv.imshow('webcam',img)
 
-    binaryImg = setBinary(img,85)
-    cv.imshow('bianry',binaryImg)
+        binaryImg = setBinary(img,85)
+        cv.imshow('bianry',binaryImg)
 
-    denoisedImg = denoise(binaryImg)
-    cv.imshow('denoised',denoisedImg)
+        denoisedImg = denoise(binaryImg)
+        cv.imshow('denoised',denoisedImg)
 
-    contours(denoisedImg,img)
-    if tecla == 27:
-        break
+        contours(denoisedImg,img)
+        if tecla == 27:
+            break
+
+main()
