@@ -4,12 +4,12 @@
 #Erosionar
 #Aplicar opening y closing consecutivamente, para filtrar ruidos
 import cv2 as cv
-webcam = cv.VideoCapture(1)
+webcam = cv.VideoCapture(0)
 
 def setBinary(image,val):
     imWebcam = image
     gray = cv.cvtColor(imWebcam, cv.COLOR_RGB2GRAY)
-    ret1, thresh1 = cv.threshold(gray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
+    ret1, thresh1 = cv.threshold(gray, val, 255, cv.THRESH_BINARY_INV)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
     return thresh1
 
 
@@ -21,7 +21,7 @@ def erosion(img):
     kernel = cv.getStructuringElement(cv.MORPH_RECT,(5,5))
     return cv.erode(img,kernel,iterations=1)
 
-def denoise(img): #TODO: el diam de el kenel
+def denoise(img): #TODO: el diam de el kernel
     kernel = cv.getStructuringElement(cv.MORPH_RECT,(3,3))
     tempImg = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
     return cv.morphologyEx(tempImg,cv.MORPH_CLOSE, kernel)
@@ -37,16 +37,19 @@ def contours(binary, img):
             cv.drawContours(img, i, -1, (255,0,255),7)
             peri = cv.arcLength(i, True)
             approx = cv.approxPolyDP(i,0.02 * peri, True)
-    cv.imshow("Rayo", img)
+    cv.imshow("Contours", img)
 
 def main():
+    cv.namedWindow('binary')
+    cv.createTrackbar('Trackbar', 'binary', 0, 255, setBinary)
     while True:
         tecla = cv.waitKey(30)
         ret, img = webcam.read()
         cv.imshow('webcam',img)
 
-        binaryImg = setBinary(img,85)
-        cv.imshow('bianry',binaryImg)
+        val = cv.getTrackbarPos("Trackbar", "binary")
+        binaryImg = setBinary(img, val)
+        cv.imshow('binary', binaryImg)
 
         denoisedImg = denoise(binaryImg)
         cv.imshow('denoised',denoisedImg)
