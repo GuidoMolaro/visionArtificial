@@ -21,7 +21,7 @@ def erosion(img):
     kernel = cv.getStructuringElement(cv.MORPH_RECT,(5,5))
     return cv.erode(img,kernel,iterations=1)
 
-def denoise(img):
+def denoise(img): #TODO: el diam de el kenel
     kernel = cv.getStructuringElement(cv.MORPH_RECT,(3,3))
     tempImg = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
     return cv.morphologyEx(tempImg,cv.MORPH_CLOSE, kernel)
