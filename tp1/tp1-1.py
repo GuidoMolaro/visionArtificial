@@ -5,16 +5,18 @@
 # Aplicar opening y closing consecutivamente, para filtrar ruidos
 import cv2 as cv
 
-webcam = cv.VideoCapture(0)
+webcam = cv.VideoCapture(1)
 
 
 def setBinary(image, val):
-    imWebcam = image
-    gray = cv.cvtColor(imWebcam, cv.COLOR_RGB2GRAY)
-    ret1, thresh1 = cv.threshold(gray, val, 255,
-                                 cv.THRESH_BINARY_INV)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
+    gray = cv.cvtColor(image, cv.COLOR_RGB2GRAY)
+    ret1, thresh1 = cv.threshold(gray, val, 255,cv.THRESH_BINARY_INV)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
     return thresh1
 
+def setBinaryAutom(image):
+    gray = cv.cvtColor(image, cv.COLOR_RGB2GRAY)
+    ret1, thresh1 = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
+    return thresh1
 
 def dilatation(img):
     kernel = cv.getStructuringElement(cv.MORPH_RECT, (5, 5))
@@ -32,7 +34,7 @@ def denoise(img, val1, val2):
     return cv.morphologyEx(tempImg, cv.MORPH_CLOSE, kernel)
 
 
-def contours(binary, img):
+def getContours(binary, img):
     contours, hierarchy = cv.findContours(binary, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
     # cv.drawContours(img, contours, -1, (0, 0, 255), 3)
@@ -45,6 +47,30 @@ def contours(binary, img):
             approx = cv.approxPolyDP(i, 0.02 * peri, True)
     cv.imshow("Contours", img)
 
+def getBiggestContour(contours):
+    try:
+        max_cnt = contours[0]
+        for cnt in contours:
+            if cv.contourArea(cnt) > cv.contourArea(max_cnt):
+                max_cnt = cnt
+        return max_cnt
+    except:
+        return contours
+def imagesContours(): #devuelve un array con todos los contornos de las img
+    circulo = setBinaryAutom('tp1/circulo.png')
+    triangulo = setBinaryAutom('tp1/triangulo.png')
+    rectangulo = setBinaryAutom('tp1/rectangulo.png')
+
+    circuloContour, hierarchy = cv.findContours(circulo, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
+    trianguloContour, hierarchy = cv.findContours(triangulo, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
+    rectanguloContour, hierarchy = cv.findContours(rectangulo, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
+
+    contours = {
+        "circulo": getBiggestContour(circuloContour),
+        "rectangulo": getBiggestContour(rectanguloContour),
+        "triangulo": getBiggestContour(trianguloContour)
+    }
+    return contours
 
 def main():
     cv.namedWindow('binary')
@@ -65,7 +91,7 @@ def main():
         denoisedImg = denoise(binaryImg, val1, val1)
         cv.imshow('denoised', denoisedImg)
 
-        contours(denoisedImg, img)
+        getContours(denoisedImg, img)
         if tecla == 27:
             break
 
