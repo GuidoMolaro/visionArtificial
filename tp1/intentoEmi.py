@@ -4,6 +4,7 @@
 # Erosionar
 # Aplicar opening y closing consecutivamente, para filtrar ruidos
 import math
+import time
 
 from PIL import Image
 import cv2 as cv
@@ -45,14 +46,12 @@ def denoise(img, val1, val2):
 def getContours(binary, img):
     contours, hierarchy = cv.findContours(binary, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
-    cv.drawContours(img, contours, -1, (0, 0, 255), 3)
-    # cv.imshow("Rayo", img)
+    #cv.drawContours(img, contours, -1, (0, 0, 255), 3)
     for i in contours:
         area = cv.contourArea(i)
         if area > 1000:
             peri = cv.arcLength(i, True)
             approx = cv.approxPolyDP(i, 0.02 * peri, True)
-    cv.imshow("Contours", img)
     return contours
 
 
@@ -84,15 +83,12 @@ def imagesContours():  # devuelve un array con todos los contornos de las img
     return contours
 
 
-def match(contour):
-    moments = cv.moments(contour)
-    huMoments = cv.HuMoments(moments)
-
+def match(contour, val):
     contours = imagesContours()
     for i in contours.keys():
         distance = cv.matchShapes(contour, contours[i], cv.CONTOURS_MATCH_I2, 0)
         print(distance)
-        if (distance < 100):
+        if distance < val:
             return True
     return False
 
@@ -102,28 +98,32 @@ def main():
     cv.createTrackbar('Thresh', 'binary', 0, 255, setBinary)
     cv.namedWindow('denoised')
     cv.createTrackbar('KSize', 'denoised', 0, 5, denoise)
+    cv.namedWindow('webcam')
+    cv.createTrackbar('Error', 'webcam', 0, 50, match)
     while True:
         tecla = cv.waitKey(30)
         ret, img = webcam.read()
-        # cv.imshow('webcam', img)
 
-        val = cv.getTrackbarPos("Thresh", "binary")
+        valBinary = cv.getTrackbarPos("Thresh", "binary")
 
-        binaryImg = setBinary(img, val)
+        binaryImg = setBinary(img, valBinary)
         cv.imshow('binary', binaryImg)
 
-        val1 = cv.getTrackbarPos('KSize', 'denoised')
-        denoisedImg = denoise(binaryImg, val1, val1)
+        valKS = cv.getTrackbarPos('KSize', 'denoised')
+        denoisedImg = denoise(binaryImg, valKS, valKS)
         cv.imshow('denoised', denoisedImg)
 
         contours = getContours(denoisedImg, img)
 
-        if match(getBiggestContour(contours)):
-            for i in contours:
-                cv.drawContours(img, i, -1, (0, 255, 0), 7)
-        else:
-            for i in contours:
-                cv.drawContours(img, i, -1, (0, 0, 255), 7)
+        valError = cv.getTrackbarPos("Error", 'webcam')
+        for i in contours:
+            if match(i, 0.01+valError/100):
+                x, y, w, h = cv.boundingRect(i)
+                cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                cv.drawContours(img, i, 0, (0, 255, 0), 3)
+            else:
+                cv.drawContours(img, i, 0, (0, 0, 255), 3)
+        cv.imshow('webcam', img)
         if tecla == 27:
             break
 
