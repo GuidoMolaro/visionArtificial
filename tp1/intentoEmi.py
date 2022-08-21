@@ -10,7 +10,7 @@ from PIL import Image
 import cv2 as cv
 import numpy as np
 
-webcam = cv.VideoCapture(0)
+webcam = cv.VideoCapture(1)
 
 
 def setBinary(image, val):
@@ -46,12 +46,13 @@ def denoise(img, val1, val2):
 def getContours(binary, img):
     contours, hierarchy = cv.findContours(binary, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
-    #cv.drawContours(img, contours, -1, (0, 0, 255), 3)
+    cv.drawContours(img, contours, -1, (0, 0, 255), 3)
     for i in contours:
         area = cv.contourArea(i)
-        if area > 1000:
+        if area > 0.5:
             peri = cv.arcLength(i, True)
             approx = cv.approxPolyDP(i, 0.02 * peri, True)
+            cv.drawContours(img, contours, -1, (255, 0, 0), 3)
     return contours
 
 
@@ -71,6 +72,7 @@ def imagesContours():  # devuelve un array con todos los contornos de las img
     triangulo = setBinaryAutom(np.array(Image.open('triangulo.png')))
     rectangulo = setBinaryAutom(np.array(Image.open('rectangulo.png')))
 
+
     circuloContour, hierarchy = cv.findContours(circulo, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
     trianguloContour, hierarchy = cv.findContours(triangulo, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
     rectanguloContour, hierarchy = cv.findContours(rectangulo, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
@@ -88,7 +90,7 @@ def match(contour, val):
     for i in contours.keys():
         distance = cv.matchShapes(contour, contours[i], cv.CONTOURS_MATCH_I2, 0)
         print(distance)
-        if distance < val:
+        if distance < val: #el error ponerlo con la barra al tope
             return True
     return False
 
@@ -120,9 +122,10 @@ def main():
             if match(i, 0.01+valError/100):
                 x, y, w, h = cv.boundingRect(i)
                 cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                cv.drawContours(img, i, 0, (0, 255, 0), 3)
             else:
-                cv.drawContours(img, i, 0, (0, 0, 255), 3)
+                x, y, w, h = cv.boundingRect(i)
+                cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+
         cv.imshow('webcam', img)
         if tecla == 27:
             break
