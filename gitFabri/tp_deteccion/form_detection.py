@@ -11,7 +11,7 @@ def main():
     trackbar_name = 'Trackbar'
     slider_max = 151
     cv2.namedWindow(window_name)
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     biggest_contour = None
     color_white = (255, 255, 255)
     create_trackbar(trackbar_name, window_name, slider_max)
@@ -24,7 +24,7 @@ def main():
         trackbar_val = get_trackbar_value(trackbar_name=trackbar_name, window_name=window_name)
         adapt_frame = adaptive_threshold(frame=gray_frame, slider_max=slider_max,
                                          adaptative=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                         binary=cv2.THRESH_BINARY,
+                                         binary=cv2.THRESH_BINARY_INV,
                                          trackbar_value=trackbar_val)
         frame_denoised = denoise(frame=adapt_frame, method=cv2.MORPH_ELLIPSE, radius=10)
         contours = get_contours(frame=frame_denoised, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
