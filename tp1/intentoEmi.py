@@ -46,10 +46,10 @@ def denoise(img, val1, val2):
 def getContours(binary, img):
     contours, hierarchy = cv.findContours(binary, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
-    cv.drawContours(img, contours, -1, (0, 0, 255), 3)
+    #cv.drawContours(img, contours, -1, (0, 0, 255), 3)
     for i in contours:
         area = cv.contourArea(i)
-        if area > 0.5:
+        if area > 1000:
             peri = cv.arcLength(i, True)
             approx = cv.approxPolyDP(i, 0.02 * peri, True)
             cv.drawContours(img, contours, -1, (255, 0, 0), 3)
@@ -72,7 +72,6 @@ def imagesContours():  # devuelve un array con todos los contornos de las img
     triangulo = setBinaryAutom(np.array(Image.open('triangulo.png')))
     rectangulo = setBinaryAutom(np.array(Image.open('rectangulo.png')))
 
-
     circuloContour, hierarchy = cv.findContours(circulo, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
     trianguloContour, hierarchy = cv.findContours(triangulo, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
     rectanguloContour, hierarchy = cv.findContours(rectangulo, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
@@ -89,7 +88,7 @@ def match(contour, val):
     contours = imagesContours()
     for i in contours.keys():
         distance = cv.matchShapes(contour, contours[i], cv.CONTOURS_MATCH_I2, 0)
-        if distance < val: #el error ponerlo con la barra al tope.
+        if distance < val:  # el error ponerlo con la barra al tope.
             return i
     return "False"
 
@@ -118,15 +117,15 @@ def main():
 
         valError = cv.getTrackbarPos("Error", 'webcam')
         for i in contours:
-            result = match(i, 0.01+valError/100)
-            if result != "False":
-                x, y, w, h = cv.boundingRect(i)
-                cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                cv.putText(img, str(result), (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-            else:
-                x, y, w, h = cv.boundingRect(i)
-                cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
-
+            if cv.contourArea(i) > 1000:
+                result = match(i, 0.01 + valError / 100)
+                if result != "False":
+                    x, y, w, h = cv.boundingRect(i)
+                    cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    cv.putText(img, str(result), (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+                else:
+                    x, y, w, h = cv.boundingRect(i)
+                    cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
         cv.imshow('webcam', img)
         if tecla == 27:
             break
