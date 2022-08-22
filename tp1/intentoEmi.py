@@ -10,7 +10,7 @@ from PIL import Image
 import cv2 as cv
 import numpy as np
 
-webcam = cv.VideoCapture(1)
+webcam = cv.VideoCapture(0)
 
 
 def setBinary(image, val):
@@ -89,7 +89,6 @@ def match(contour, val):
     contours = imagesContours()
     for i in contours.keys():
         distance = cv.matchShapes(contour, contours[i], cv.CONTOURS_MATCH_I2, 0)
-        print(distance)
         if distance < val: #el error ponerlo con la barra al tope
             return True
     return False
