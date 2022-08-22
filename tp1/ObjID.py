@@ -10,7 +10,7 @@ from PIL import Image
 import cv2 as cv
 import numpy as np
 
-webcam = cv.VideoCapture(0)
+webcam = cv.VideoCapture(1)
 
 
 def setBinary(image, val):
