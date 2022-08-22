@@ -112,8 +112,8 @@ def main():
         for i in contours1:
             contours = imagesContours()
             for j in contours.keys():
-                distance = cv.matchShapes(i, contours[j], cv.CONTOURS_MATCH_I2, 0)
-                if distance < valError/1000:
+                error = cv.matchShapes(i, contours[j], cv.CONTOURS_MATCH_I2, 0)
+                if error < valError/1000:
                     x, y, w, h = cv.boundingRect(i)
                     cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 10)
                     cv.putText(img, j, (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
