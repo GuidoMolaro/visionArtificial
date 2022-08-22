@@ -90,8 +90,8 @@ def match(contour, val):
     for i in contours.keys():
         distance = cv.matchShapes(contour, contours[i], cv.CONTOURS_MATCH_I2, 0)
         if distance < val: #el error ponerlo con la barra al tope
-            return True
-    return False
+            return i
+    return "False"
 
 
 def main():
@@ -118,9 +118,10 @@ def main():
 
         valError = cv.getTrackbarPos("Error", 'webcam')
         for i in contours:
-            if match(i, 0.01+valError/100):
+            if match(i, 0.01+valError/100) != "False":
                 x, y, w, h = cv.boundingRect(i)
                 cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                cv.putText(img, i, (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
             else:
                 x, y, w, h = cv.boundingRect(i)
                 cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
