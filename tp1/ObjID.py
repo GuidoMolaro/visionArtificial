@@ -3,20 +3,29 @@
 # Dilatar una imagen binaria, controlar el tamaño del elemento estructural con un trackbar, de 1 a 50
 # Erosionar
 # Aplicar opening y closing consecutivamente, para filtrar ruidos
-import cv2 as cv
+import math
+import time
 
-webcam = cv.VideoCapture(1)
+from PIL import Image
+import cv2 as cv
+import numpy as np
+
+webcam = cv.VideoCapture(0)
 
 
 def setBinary(image, val):
     gray = cv.cvtColor(image, cv.COLOR_RGB2GRAY)
-    ret1, thresh1 = cv.threshold(gray, val, 255,cv.THRESH_BINARY_INV)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
+    ret1, thresh1 = cv.threshold(gray, val, 255,
+                                 cv.THRESH_BINARY_INV)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
     return thresh1
+
 
 def setBinaryAutom(image):
     gray = cv.cvtColor(image, cv.COLOR_RGB2GRAY)
-    ret1, thresh1 = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
+    ret1, thresh1 = cv.threshold(gray, 0, 255,
+                                 cv.THRESH_BINARY_INV + cv.THRESH_OTSU)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
     return thresh1
+
 
 def dilatation(img):
     kernel = cv.getStructuringElement(cv.MORPH_RECT, (5, 5))
@@ -37,15 +46,15 @@ def denoise(img, val1, val2):
 def getContours(binary, img):
     contours, hierarchy = cv.findContours(binary, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
-    # cv.drawContours(img, contours, -1, (0, 0, 255), 3)
-    # cv.imshow("Rayo", img)
+    cv.drawContours(img, contours, -1, (0, 0, 255), 3)
     for i in contours:
         area = cv.contourArea(i)
-        if area > 1000:
-            cv.drawContours(img, i, -1, (255, 0, 255), 7)
+        if area > 0.5:
             peri = cv.arcLength(i, True)
             approx = cv.approxPolyDP(i, 0.02 * peri, True)
-    cv.imshow("Contours", img)
+            cv.drawContours(img, contours, -1, (255, 0, 0), 3)
+    return contours
+
 
 def getBiggestContour(contours):
     try:
@@ -56,42 +65,62 @@ def getBiggestContour(contours):
         return max_cnt
     except:
         return contours
-def imagesContours(): #devuelve un array con todos los contornos de las img
-    circulo = setBinaryAutom('tp1/circulo.png')
-    triangulo = setBinaryAutom('tp1/triangulo.png')
-    rectangulo = setBinaryAutom('tp1/rectangulo.png')
+
+
+def imagesContours():  # devuelve un array con todos los contornos de las img
+    circulo = setBinaryAutom(np.array(Image.open('circulo.png')))
+    triangulo = setBinaryAutom(np.array(Image.open('triangulo.png')))
+    rectangulo = setBinaryAutom(np.array(Image.open('rectangulo.png')))
+
 
     circuloContour, hierarchy = cv.findContours(circulo, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
     trianguloContour, hierarchy = cv.findContours(triangulo, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
     rectanguloContour, hierarchy = cv.findContours(rectangulo, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
     contours = {
+        "triangulo": getBiggestContour(trianguloContour),
         "circulo": getBiggestContour(circuloContour),
-        "rectangulo": getBiggestContour(rectanguloContour),
-        "triangulo": getBiggestContour(trianguloContour)
+        "rectangulo": getBiggestContour(rectanguloContour)
+
     }
     return contours
+
 
 def main():
     cv.namedWindow('binary')
     cv.createTrackbar('Thresh', 'binary', 0, 255, setBinary)
     cv.namedWindow('denoised')
     cv.createTrackbar('KSize', 'denoised', 0, 5, denoise)
+    cv.namedWindow('webcam')
+    cv.createTrackbar('Error', 'webcam', 0, 50, denoise)
     while True:
         tecla = cv.waitKey(30)
         ret, img = webcam.read()
-        cv.imshow('webcam', img)
 
-        val = cv.getTrackbarPos("Thresh", "binary")
+        valBinary = cv.getTrackbarPos("Thresh", "binary")
 
-        binaryImg = setBinary(img, val)
+        binaryImg = setBinary(img, valBinary)
         cv.imshow('binary', binaryImg)
 
-        val1 = cv.getTrackbarPos('KSize', 'denoised')
-        denoisedImg = denoise(binaryImg, val1, val1)
+        valKS = cv.getTrackbarPos('KSize', 'denoised')
+        denoisedImg = denoise(binaryImg, valKS, valKS)
         cv.imshow('denoised', denoisedImg)
 
-        getContours(denoisedImg, img)
+        contours = getContours(denoisedImg, img)
+
+        valError = cv.getTrackbarPos("Error", 'webcam')
+        for i in contours:
+            contours = imagesContours()
+            for j in contours.keys():
+                distance = cv.matchShapes(i, contours[j], cv.CONTOURS_MATCH_I2, 0)
+                if distance < valError/1000:
+                    x, y, w, h = cv.boundingRect(i)
+                    cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    cv.putText(img, j, (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+                else:
+                    x, y, w, h = cv.boundingRect(i)
+                    cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        cv.imshow('webcam', img)
         if tecla == 27:
             break
 
