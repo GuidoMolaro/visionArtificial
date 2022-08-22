@@ -65,7 +65,7 @@ def getBiggestContour(contours):
         return contours
 
 
-def imagesContours():  # devuelve un array con todos los contornos de las img
+def imagesContours():  # devuelve un array con todos los contornos de las img.
     circulo = setBinaryAutom(np.array(Image.open('circulo.png')))
     triangulo = setBinaryAutom(np.array(Image.open('triangulo.png')))
     rectangulo = setBinaryAutom(np.array(Image.open('rectangulo.png')))

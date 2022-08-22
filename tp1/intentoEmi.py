@@ -89,7 +89,7 @@ def match(contour, val):
     contours = imagesContours()
     for i in contours.keys():
         distance = cv.matchShapes(contour, contours[i], cv.CONTOURS_MATCH_I2, 0)
-        if distance < val: #el error ponerlo con la barra al tope
+        if distance < val: #el error ponerlo con la barra al tope.
             return i
     return "False"
 
