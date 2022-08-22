@@ -118,8 +118,7 @@ def main():
                     cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
                     cv.putText(img, j, (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
                 else:
-                    x, y, w, h = cv.boundingRect(i)
-                    cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                    cv.drawContours(img, i, 0, (0,0,255), 3)
         cv.imshow('webcam', img)
         if tecla == 27:
             break
