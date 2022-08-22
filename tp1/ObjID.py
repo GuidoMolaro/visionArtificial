@@ -10,7 +10,7 @@ from PIL import Image
 import cv2 as cv
 import numpy as np
 
-webcam = cv.VideoCapture(1)
+webcam = cv.VideoCapture(0)
 
 
 def setBinary(image, val):
@@ -46,13 +46,13 @@ def denoise(img, val1, val2):
 def getContours(binary, img):
     contours, hierarchy = cv.findContours(binary, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
-    cv.drawContours(img, contours, -1, (0, 0, 255), 3)
+    #cv.drawContours(img, contours, -1, (0, 0, 255), 3)
     for i in contours:
         area = cv.contourArea(i)
         if area > 0.5:
             peri = cv.arcLength(i, True)
             approx = cv.approxPolyDP(i, 0.02 * peri, True)
-            cv.drawContours(img, contours, -1, (255, 0, 0), 3)
+            #cv.drawContours(img, contours, -1, (255, 0, 0), 3)
     return contours
 
 
@@ -106,19 +106,20 @@ def main():
         denoisedImg = denoise(binaryImg, valKS, valKS)
         cv.imshow('denoised', denoisedImg)
 
-        contours = getContours(denoisedImg, img)
+        contours1 = getContours(denoisedImg, img)
 
         valError = cv.getTrackbarPos("Error", 'webcam')
-        for i in contours:
+        for i in contours1:
             contours = imagesContours()
             for j in contours.keys():
                 distance = cv.matchShapes(i, contours[j], cv.CONTOURS_MATCH_I2, 0)
                 if distance < valError/1000:
                     x, y, w, h = cv.boundingRect(i)
-                    cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 10)
                     cv.putText(img, j, (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
                 else:
-                    cv.drawContours(img, i, 0, (0,0,255), 3)
+                    x, y, w, h = cv.boundingRect(i)
+                    cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 1)
         cv.imshow('webcam', img)
         if tecla == 27:
             break
