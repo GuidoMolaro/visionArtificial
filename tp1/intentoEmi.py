@@ -121,7 +121,7 @@ def main():
             if match(i, 0.01+valError/100) != "False":
                 x, y, w, h = cv.boundingRect(i)
                 cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                cv.putText(img, i, (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+                cv.putText(img, match(i, 0.01+valError/100), (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
             else:
                 x, y, w, h = cv.boundingRect(i)
                 cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
