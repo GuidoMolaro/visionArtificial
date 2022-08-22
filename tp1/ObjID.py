@@ -46,13 +46,11 @@ def denoise(img, val1, val2):
 def getContours(binary, img):
     contours, hierarchy = cv.findContours(binary, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
-    #cv.drawContours(img, contours, -1, (0, 0, 255), 3)
     for i in contours:
         area = cv.contourArea(i)
         if area > 0.5:
             peri = cv.arcLength(i, True)
             approx = cv.approxPolyDP(i, 0.02 * peri, True)
-            #cv.drawContours(img, contours, -1, (255, 0, 0), 3)
     return contours
 
 
@@ -81,7 +79,6 @@ def imagesContours():  # devuelve un array con todos los contornos de las img
         "triangulo": getBiggestContour(trianguloContour),
         "circulo": getBiggestContour(circuloContour),
         "rectangulo": getBiggestContour(rectanguloContour)
-
     }
     return contours
 
@@ -113,13 +110,14 @@ def main():
             contours = imagesContours()
             for j in contours.keys():
                 error = cv.matchShapes(i, contours[j], cv.CONTOURS_MATCH_I2, 0)
-                if error < valError/1000:
-                    x, y, w, h = cv.boundingRect(i)
-                    cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 10)
-                    cv.putText(img, j, (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-                else:
-                    x, y, w, h = cv.boundingRect(i)
-                    cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 1)
+                if cv.contourArea(i) > 1000:
+                    if error < valError/1000:
+                        x, y, w, h = cv.boundingRect(i)
+                        cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 10)
+                        cv.putText(img, j, (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+                    else:
+                        x, y, w, h = cv.boundingRect(i)
+                        cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 1)
         cv.imshow('webcam', img)
         if tecla == 27:
             break
