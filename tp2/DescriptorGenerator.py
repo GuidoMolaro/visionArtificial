@@ -3,9 +3,9 @@ import pandas as pd
 import openpyxl as openpyxl
 def descriptionGenerator(filename):
     im = cv.imread(filename, cv.IMREAD_GRAYSCALE)
-    _, im = cv.threshold(im, 128, 255, cv.THRESH_BINARY)
+    _, im = cv.threshold(im, 128, 255, cv.THRESH_BINARY_INV+cv.THRESH_OTSU)
     moment = cv.moments(im)
-    huMoment = cv.HuMoments(moment)
+    huMoment = cv.HuMoments(moment).flatten()
     return huMoment
 
 def dataset(info):

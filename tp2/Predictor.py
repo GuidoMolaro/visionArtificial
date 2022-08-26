@@ -9,9 +9,10 @@ import time
 from PIL import Image
 import cv2 as cv
 import numpy as np
+from joblib import dump, load
 
 webcam = cv.VideoCapture(0)
-
+classifier = load('classifier.joblib')
 
 def setBinary(image, val):
     gray = cv.cvtColor(image, cv.COLOR_RGB2GRAY)
@@ -84,23 +85,11 @@ def imagesContours():  # devuelve un array con todos los contornos de las img
     }
     return contours
 
-
-def match(contour, val):
-    contours = imagesContours()
-    for i in contours.keys():
-        distance = cv.matchShapes(contour, contours[i], cv.CONTOURS_MATCH_I2, 0)
-        if distance < val: #el error ponerlo con la barra al tope.
-            return i
-    return "False"
-
-
 def main():
     cv.namedWindow('binary')
-    cv.createTrackbar('Thresh', 'binary', 0, 255, setBinary)
+    cv.createTrackbar('Thresh', 'binary', 100, 255, setBinary)
     cv.namedWindow('denoised')
-    cv.createTrackbar('KSize', 'denoised', 0, 5, denoise)
-    cv.namedWindow('webcam')
-    cv.createTrackbar('Error', 'webcam', 0, 50, match)
+    cv.createTrackbar('KSize', 'denoised', 1, 5, denoise)
     while True:
         tecla = cv.waitKey(30)
         ret, img = webcam.read()
@@ -116,17 +105,15 @@ def main():
 
         contours = getContours(denoisedImg, img)
 
-        valError = cv.getTrackbarPos("Error", 'webcam')
         for i in contours:
-            result = match(i, 0.01+valError/100)
-            if result != "False":
+            if cv.contourArea(i) > 1000:
+                moments = cv.moments(i)
+                huMoments = cv.HuMoments(moments).flatten()
+                analyze = huMoments.reshape(1,-1)
+                result = classifier.predict(analyze)
                 x, y, w, h = cv.boundingRect(i)
                 cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 cv.putText(img, str(result), (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-            else:
-                x, y, w, h = cv.boundingRect(i)
-                cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
-
         cv.imshow('webcam', img)
         if tecla == 27:
             break
