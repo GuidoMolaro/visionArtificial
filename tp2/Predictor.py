@@ -75,11 +75,13 @@ def imagesContours():  # devuelve un array con todos los contornos de las img
     }
     return contours
 
+def lam(x):
+    pass
 def main():
     cv.namedWindow('binary')
-    cv.createTrackbar('Thresh', 'binary', 100, 255, setBinary)
+    cv.createTrackbar('Thresh', 'binary', 100, 255, lam)
     cv.namedWindow('denoised')
-    cv.createTrackbar('KSize', 'denoised', 1, 5, denoise)
+    cv.createTrackbar('KSize', 'denoised', 1, 5, lam)
     while True:
         tecla = cv.waitKey(30)
         ret, img = webcam.read()
@@ -98,9 +100,11 @@ def main():
         for i in contours:
             if cv.contourArea(i) > 1000:
                 moments = cv.moments(i)
-                huMoments = cv.HuMoments(moments).flatten()
-                analyze = huMoments.reshape(1,-1)
-                result = classifier.predict(analyze)
+                huMoments = list(cv.HuMoments(moments))
+                # for hu_mon in huMoments:
+
+                # analyze = huMoments.reshape(1,-1)
+                result = classifier.predict([huMoments])
                 x, y, w, h = cv.boundingRect(i)
                 cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 cv.putText(img, str(result), (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
