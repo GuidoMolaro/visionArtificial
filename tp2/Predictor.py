@@ -1,11 +1,3 @@
-# Ejercicios con la cámara, en tiempo real, mostrando siempre en una ventana la imagen de la cámara.  Requiere imágenes binarias,
-# que se pueden obtener por thresholding.
-# Dilatar una imagen binaria, controlar el tamaño del elemento estructural con un trackbar, de 1 a 50
-# Erosionar
-# Aplicar opening y closing consecutivamente, para filtrar ruidos
-import math
-import time
-
 from PIL import Image
 import cv2 as cv
 import numpy as np
@@ -16,15 +8,13 @@ classifier = load('classifier.joblib')
 
 def setBinary(image, val):
     gray = cv.cvtColor(image, cv.COLOR_RGB2GRAY)
-    ret1, thresh1 = cv.threshold(gray, val, 255,
-                                 cv.THRESH_BINARY_INV)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
+    ret1, thresh1 = cv.threshold(gray, val, 255, cv.THRESH_BINARY_INV)
     return thresh1
 
 
 def setBinaryAutom(image):
     gray = cv.cvtColor(image, cv.COLOR_RGB2GRAY)
-    ret1, thresh1 = cv.threshold(gray, 0, 255,
-                                 cv.THRESH_BINARY_INV + cv.THRESH_OTSU)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
+    ret1, thresh1 = cv.threshold(gray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
     return thresh1
 
 
