@@ -2,6 +2,7 @@ from sklearn import *
 from joblib import dump
 import matplotlib.pyplot as plt
 import xlwings as xw
+from sklearn.model_selection import train_test_split # Import train_test_split function
 
 ws = xw.Book("data.xlsx").sheets['sheet1']
 y = ws.range("A2:A31").value
@@ -24,7 +25,11 @@ x = [
     for i in range(30)
 ]
 
-classifier = tree.DecisionTreeClassifier().fit(x, y)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=1) # 70% training and 30% test
+
+classifier = tree.DecisionTreeClassifier()
+classifier = classifier.fit(x_train, y_train)
+y_pred = classifier.predict(x_test)
 fig = plt.figure(figsize=(25, 20))
 _ = tree.plot_tree(classifier)
 fig.savefig("decistion_tree.png")
