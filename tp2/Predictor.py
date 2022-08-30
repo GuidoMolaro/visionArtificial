@@ -1,3 +1,5 @@
+from math import copysign, log10
+
 from PIL import Image
 import cv2 as cv
 import numpy as np
@@ -100,9 +102,9 @@ def main():
         for i in contours:
             if cv.contourArea(i) > 1000:
                 moments = cv.moments(i)
-                huMoments = list(cv.HuMoments(moments))
-                # for hu_mon in huMoments:
-
+                huMoments = cv.HuMoments(moments)
+                for j in huMoments:
+                    huMoments[j] = -1 * copysign(1.0, huMoments[j]) * log10(abs(huMoments[j]))
                 # analyze = huMoments.reshape(1,-1)
                 result = classifier.predict([huMoments])
                 x, y, w, h = cv.boundingRect(i)
