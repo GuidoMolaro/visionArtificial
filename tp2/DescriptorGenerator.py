@@ -10,7 +10,7 @@ def descriptionGenerator(filename):
     return huMoment
 
 def dataset(info):
-    #circulo 1, rectangulo 2, triangulo 3
+    #circulo 1, estrella 2, triangulo 3
     dataset = [
         descriptionGenerator('10triangles/t8.jpeg'),
         descriptionGenerator('10triangles/t9.jpeg'),
@@ -48,8 +48,7 @@ def dataset(info):
     columns = 7
     for i in range(rows):
         for j in range(columns):
-            dataset[i][j] = -1 * np.copysign(1.0, dataset[i][j]) * np.log10(
-                np.absolute(dataset[i][j]))
+            dataset[i][j] = -1 * np.copysign(1.0, dataset[i][j]) * np.log10(np.absolute(dataset[i][j]))
 
     if info ==1:
         return dataset

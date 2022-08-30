@@ -1,15 +1,8 @@
-from math import copysign, log10
-import numpy as np
-from sklearn import tree
-from joblib import dump, load
-from sklearn.datasets import load_iris
-from DescriptorGenerator import dataset
+from sklearn import *
+from joblib import dump
 import matplotlib.pyplot as plt
-# Python3 code to select
-# data from excel
 import xlwings as xw
 
-# Specifying a sheet
 ws = xw.Book("data.xlsx").sheets['sheet1']
 y = ws.range("A2:A31").value
 hu1 = ws.range("B2:B31").value
@@ -35,5 +28,5 @@ classifier = tree.DecisionTreeClassifier().fit(x, y)
 fig = plt.figure(figsize=(25, 20))
 _ = tree.plot_tree(classifier)
 fig.savefig("decistion_tree.png")
-# guarda el modelo en un archivo
+
 dump(classifier, 'classifier.joblib')

@@ -1,9 +1,8 @@
-from math import copysign, log10
-
 import cv2 as cv
 from joblib import load
+import numpy as np
 
-webcam = cv.VideoCapture(1)
+webcam = cv.VideoCapture(0)
 classifier = load('classifier.joblib')
 
 def setBinary(image, val):
@@ -62,10 +61,12 @@ def main():
             if cv.contourArea(i) > 1000:
                 moments = cv.moments(i)
                 huMoments = cv.HuMoments(moments)
-                for j in huMoments:
-                    huMoments[j] = -1 * copysign(1.0, huMoments[j]) * log10(abs(huMoments[j]))
+                size = 7
+                for j in range(size):
+                    huMoments[j] = -1 * np.copysign(1.0, huMoments[j]) * np.log10(np.absolute(huMoments[j]))
                 # analyze = huMoments.reshape(1,-1)
-                result = classifier.predict([huMoments])
+                result = classifier.predict(huMoments) #wtf SIEMPRE ME TIRA ERROR
+                #guido no uses flatten, no funciona
                 x, y, w, h = cv.boundingRect(i)
                 cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 cv.putText(img, str(result), (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
