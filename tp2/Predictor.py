@@ -65,11 +65,17 @@ def main():
                 for j in range(size):
                     huMoments[j] = -1 * np.copysign(1.0, huMoments[j]) * np.log10(np.absolute(huMoments[j]))
                 # analyze = huMoments.reshape(1,-1)
-                result = classifier.predict(huMoments) #wtf SIEMPRE ME TIRA ERROR
-                #guido no uses flatten, no funciona
+                result = classifier.predict(huMoments) # wtf SIEMPRE ME TIRA ERROR
+                # guido no uses flatten, no funciona
                 x, y, w, h = cv.boundingRect(i)
                 cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                cv.putText(img, str(result), (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+                if result == 1:
+                    cv.putText(img, "Circle", (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+                if result == 2:
+                    cv.putText(img,"Star", (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+                if result == 3:
+                    cv.putText(img, "Triangle", (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+
         cv.imshow('webcam', img)
         if tecla == 27:
             break
