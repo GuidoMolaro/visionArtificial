@@ -5,7 +5,7 @@ import cv2 as cv
 import numpy as np
 from joblib import dump, load
 
-webcam = cv.VideoCapture(0)
+webcam = cv.VideoCapture(1)
 classifier = load('classifier.joblib')
 
 def setBinary(image, val):

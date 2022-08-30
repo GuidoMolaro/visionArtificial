@@ -1,5 +1,5 @@
 from math import copysign, log10
-
+import numpy as np
 from sklearn import tree
 from joblib import dump, load
 from sklearn.datasets import load_iris
@@ -41,9 +41,16 @@ x = [
 
 y = [3, 3, 3, 1, 1, 2, 2, 3, 2, 1, 2, 2, 1, 1, 1, 2, 2, 3, 3, 3, 3, 2, 2, 1, 1, 2, 1, 3, 3, 1]
 
-for j in x:
-    for i in x[j]:
-        x[j[i]] = -1 * copysign(1.0, x[j]) * log10(abs(x[j]))
+#for j in x:
+ #   for i in x[j]:
+  #      x[j[i]] = -1 * copysign(1.0, x[j]) * log10(abs(x[j]))
+rows = 30
+columns= 7
+for i in range(rows):
+    for j in range(columns):
+        x[i][j] = -1 * np.copysign(1.0, x[i][j]) * np.log10(np.absolute(x[i][j])) #TODO me tira un error de numero negativo pero tengo el abs
+        print(x[i][j])
+
 
 classifier = tree.DecisionTreeClassifier().fit(x, y)
 fig = plt.figure(figsize=(25, 20))
