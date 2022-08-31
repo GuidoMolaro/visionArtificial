@@ -63,16 +63,10 @@ def main():
             if cv.contourArea(i) > 1000:
                 moments = cv.moments(i)
                 hu = cv.HuMoments(moments)
-                size = 7
-                print(hu)
-                huMoments = [
-                    hu[i][0]
-                    for i in range(size)
-                ]
-                print(huMoments)
-                for j in range(size):
+                huMoments = [hu[i][0] for i in range(7)]
+                for j in range(7):
                     huMoments[j] = -1 * np.copysign(1.0, huMoments[j]) * np.log10(np.absolute(huMoments[j]))
-                result = classifier.predict(huMoments)
+                result = classifier.predict([huMoments])
                 x, y, w, h = cv.boundingRect(i)
                 cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 if result == 1:
