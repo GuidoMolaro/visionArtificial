@@ -13,7 +13,6 @@ hu4 = ws.range("E2:E31").value
 hu5 = ws.range("F2:F31").value
 hu6 = ws.range("G2:G31").value
 hu7 = ws.range("H2:H31").value
-
 x = [
     [float(hu1[i].strip("[]")),
      float(hu2[i].strip("[]")),
@@ -24,6 +23,7 @@ x = [
      float(hu7[i].strip("[]"))]
     for i in range(30)
 ]
+print(x)
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=1) # 70% training and 30% test
 
