@@ -23,7 +23,6 @@ x = [
      float(hu7[i].strip("[]"))]
     for i in range(30)
 ]
-print(x)
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=1) # 70% training and 30% test
 

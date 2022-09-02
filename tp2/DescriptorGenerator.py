@@ -2,11 +2,24 @@ import cv2 as cv
 import numpy as np
 import pandas as pd
 def descriptionGenerator(filename):
-    im = cv.imread(filename, cv.IMREAD_GRAYSCALE)
+    im = cv.imread(filename)
+    im = cv.cvtColor(im, cv.COLOR_RGB2GRAY)
     _, im = cv.threshold(im, 128, 255, cv.THRESH_BINARY_INV+cv.THRESH_OTSU)
-    moment = cv.moments(im)
+    imContour, hierarchy = cv.findContours(im, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
+
+    moment = cv.moments(getBiggestContour(imContour))
     huMoment = cv.HuMoments(moment)
     return huMoment
+
+def getBiggestContour(contours):
+    try:
+        max_cnt = contours[0]
+        for cnt in contours:
+            if cv.contourArea(cnt) > cv.contourArea(max_cnt):
+                max_cnt = cnt
+        return max_cnt
+    except:
+        return contours
 
 def dataset(info):
     #circulo 1, estrella 2, triangulo 3
@@ -16,7 +29,7 @@ def dataset(info):
         descriptionGenerator('10triangles/t10.jpeg'),
         descriptionGenerator('10circles/c1.png'),
         descriptionGenerator('10circles/c2.png'),
-        descriptionGenerator('10stars/e1.png'),
+        descriptionGenerator('10stars/e1.jpeg'),
         descriptionGenerator('10stars/e2.png'),
         descriptionGenerator('10triangles/t5.jpeg'),
         descriptionGenerator('10stars/e3.png'),
@@ -33,14 +46,14 @@ def dataset(info):
         descriptionGenerator('10triangles/t3.jpeg'),
         descriptionGenerator('10triangles/t4.jpeg'),
         descriptionGenerator('10stars/e9.jpg'),
-        descriptionGenerator('10stars/e10.png'),
+        descriptionGenerator('10stars/e10.jpeg'),
         descriptionGenerator('10circles/c7.png'),
         descriptionGenerator('10circles/c8.png'),
         descriptionGenerator('10stars/e4.png'),
-        descriptionGenerator('10circles/c9.png'),
+        descriptionGenerator('10circles/c9.jpeg'),
         descriptionGenerator('10triangles/t6.jpeg'),
         descriptionGenerator('10triangles/t7.jpeg'),
-        descriptionGenerator('10circles/c10.png')]
+        descriptionGenerator('10circles/c10.jpeg')]
     tags = [3, 3, 3, 1, 1, 2, 2, 3, 2, 1, 2, 2, 1, 1, 1, 2, 2, 3, 3, 3, 3, 2, 2, 1, 1, 2, 1, 3, 3, 1]
 
     rows = 30
