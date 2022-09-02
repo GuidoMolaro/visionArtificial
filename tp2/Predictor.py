@@ -1,7 +1,6 @@
 import cv2 as cv
 from joblib import load
 import numpy as np
-from sklearn import *
 
 
 webcam = cv.VideoCapture(0)
@@ -46,8 +45,8 @@ def main():
     cv.createTrackbar('KSize', 'denoised', 1, 5, lam)
     while True:
         tecla = cv.waitKey(30)
-        ret, img = webcam.read()
-
+        #ret, img = webcam.read()
+        img = cv.imread('../tp2/10triangles/t3.jpeg')
         valBinary = cv.getTrackbarPos("Thresh", "binary")
 
         binaryImg = setBinary(img, valBinary)
@@ -67,6 +66,8 @@ def main():
                 for j in range(7):
                     huMoments[j] = -1 * np.copysign(1.0, huMoments[j]) * np.log10(np.absolute(huMoments[j]))
                 result = classifier.predict([huMoments])
+                #print(type(result))
+                #print(result)
                 x, y, w, h = cv.boundingRect(i)
                 cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 if result == 1:

@@ -1,7 +1,6 @@
 import cv2 as cv
 import numpy as np
 import pandas as pd
-import openpyxl as openpyxl
 def descriptionGenerator(filename):
     im = cv.imread(filename, cv.IMREAD_GRAYSCALE)
     _, im = cv.threshold(im, 128, 255, cv.THRESH_BINARY_INV+cv.THRESH_OTSU)
