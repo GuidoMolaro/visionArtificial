@@ -59,7 +59,7 @@ def main():
     unknown = cv.subtract(background, foreground)
 
     #Show Images
-    cv.putText(binary, quant, (0, 670), cv.FONT_HERSHEY_SIMPLEX, 1.5, (255, 0, 0), 2)
+    cv.putText(binary, quant, (0, 670), cv.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 2)
     cv.imshow('Binary', binary)
     cv.imshow('SureNuclei', foreground)
     cv.imshow('Unknown', unknown)
