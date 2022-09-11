@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+from matplotlib import pyplot as plt
 
 
 def lam(x):
@@ -28,36 +29,40 @@ def setBinary(image, val):
 
 
 cv.namedWindow('Tracks')
-cv.createTrackbar('Thresh', 'Tracks', 100, 255, lam)
+cv.createTrackbar('ThreshFg', 'Tracks', 100, 255, lam)
+cv.createTrackbar('ThreshBg', 'Tracks', 20, 255, lam)
 cv.createTrackbar('Open', 'Tracks', 3, 10, lam)
-cv.createTrackbar('Dilate', 'Tracks', 3, 100, lam)
+cv.createTrackbar('Dilate', 'Tracks', 20, 100, lam)
 cv.createTrackbar('Erode', 'Tracks', 3, 100, lam)
 
 
 def main():
     # Get and show Cells
     img = cv.imread("levadura.png")
-    cv.imshow('cells', img)
 
     # Get binaryImg and find all the Nuclei
-    threshold = cv.getTrackbarPos('Thresh', 'Tracks')
+    threshold = cv.getTrackbarPos('ThreshFg', 'Tracks')
+    thresholdBg = cv.getTrackbarPos('ThreshBg', 'Tracks')
     binary = setBinary(img, threshold)
+    binaryBg = setBinary(img,thresholdBg)
     contours, hierarchy = cv.findContours(binary, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
-    quant = str(len(contours))
+    quant = str(len(contours)-1)
 
     # Noise Removal
     open1 = cv.getTrackbarPos('Open', 'Tracks')
     opened = open(binary, open1)
+    opened2 = open(binaryBg, open1)
 
     # Sure Background Area
     dil1 = cv.getTrackbarPos('Dilate', 'Tracks')
-    background = dilate(opened, dil1)
+    background = dilate(opened2, dil1)
     cv.imshow('Background', background)
 
     # Sure Foreground (Nuclei)
-    ero = cv.getTrackbarPos('Erode', 'Tracks')
-    foreground = erode(opened, ero)
-    foreground = np.uint8(foreground)
+    dist_transform = cv.distanceTransform(opened, cv.DIST_L2, 5)
+    cv.imshow('DT', dist_transform)
+    ret, sure_fg = cv.threshold(dist_transform, 0.1* dist_transform.max(), 255, 0)
+    foreground = np.uint8(sure_fg)
 
     # Unknown Region
     unknown = cv.subtract(background, foreground)
@@ -65,15 +70,16 @@ def main():
     #Show Images
     cv.putText(binary, quant, (0, 670), cv.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 2)
     cv.imshow('Binary', binary)
+    cv.imshow('BinaryBg', binaryBg)
     cv.imshow('SureNuclei', foreground)
     cv.imshow('Unknown', unknown)
 
     # Markers
     ret, markers = cv.connectedComponents(foreground)
-    markers = markers + 1
+    markers = markers + 10
     markers[unknown == 255] = 0
-    #color = cv.applyColorMap(unknown, cv.COLORMAP_JET)
-    #cv.imshow('ColorMap', color)
+    plt.imshow(markers, cmap='jet')
+    plt.show()
     markers = cv.watershed(img, markers)
     img[markers == -1] = [255, 0, 0]
     cv.imshow('Watershed', img)
