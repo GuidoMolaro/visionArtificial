@@ -1,9 +1,12 @@
 import cv2 as cv
 import numpy as np
+from matplotlib import pyplot as pl
+
 def setBinary(image, val):
     gray = cv.cvtColor(image, cv.COLOR_RGB2GRAY)
-    ret1, thresh1 = cv.threshold(gray, val, 255,cv.THRESH_BINARY)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
-    return thresh1
+    ret1, fg = cv.threshold(gray, val, 255,cv.THRESH_BINARY)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
+    ret2, bg = cv.threshold(gray, val, 255,cv.THRESH_BINARY)  # aplica funcion threadhole / ret1 si es true --> significa q no tenemos error
+    return fg , bg
 
 def lam(x):
     return x
@@ -12,36 +15,64 @@ def lam(x):
 def main():
     cv.namedWindow('Tracks')
     cv.createTrackbar('Thresh', 'Tracks', 100, 255, lam)
-    cv.createTrackbar('Open', 'Tracks', 3, 10, lam)
     cv.createTrackbar('Dilate', 'Tracks', 20, 100, lam)
     cv.createTrackbar('Erode', 'Tracks', 3, 100, lam)
 
     while True:
         key = cv.waitKey(30)
+
+        #ToBinary
         threshVal = cv.getTrackbarPos('Thresh', 'Tracks')
         img = cv.imread("levadura.png")
-        imgBinary = setBinary(img, threshVal)
-        cv.imshow("bin", imgBinary)
+        fg , bg = setBinary(img, threshVal)
+        #cv.imshow("bin", imgBinary)
 
-        # noise removal
-        openVal = cv.getTrackbarPos('Open', 'Tracks')
-        kernelOpen = np.ones((openVal, openVal), np.uint8)
-        opening = cv.morphologyEx(imgBinary, cv.MORPH_OPEN, kernelOpen, iterations=2)
 
         # sure background area
         dilateVal = cv.getTrackbarPos('Dilate', 'Tracks')
         kernel = np.ones((dilateVal, dilateVal), np.uint8)
-        sure_bg = cv.dilate(opening, kernel, iterations=3)
+        sure_bg = cv.dilate(bg, kernel, iterations=3)
 
         # Finding sure foreground area
-        dist_transform = cv.distanceTransform(opening, cv.DIST_L2, 5)
-        ret, sure_fg = cv.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
+        erodeVal = cv.getTrackbarPos('Erode', 'Tracks')
+        kernelErode = np.ones((erodeVal, erodeVal), np.uint8)
+        fg_eroded = cv.morphologyEx(fg, cv.MORPH_ERODE, kernelErode)
+        fgDilated = cv.morphologyEx(fg_eroded,cv.MORPH_DILATE, kernel)
+
+        # dist_transform = cv.distanceTransform(fg_eroded, cv.DIST_L2, 5)
+        #ret, sure_fg = cv.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
 
         # Finding unknown region
-        sure_fg = np.uint8(sure_fg)
-        unknown = cv.subtract(sure_bg, sure_fg)
-        cv.imshow("sureFg", sure_fg)
+        unknown = cv.subtract(sure_bg, fgDilated)
+        cv.imshow("sureFg", fgDilated)
         cv.imshow("subreBg", sure_bg)
+
+        #Markers
+        _, markers = cv.connectedComponents(fgDilated)
+        # Add one to all labels so that sure background is not 0, but 1
+        markers = markers + 1
+        # Now, mark the region of unknown with zero
+        markers[unknown == 255] = 0
+
+        pl.imshow(markers, cmap="jet")
+        pl.show()
+
+        for i in np.unique(markers):
+            if i % 3 == 0:
+                img[markers == i] = [255, 0, 0]
+            elif i % 3 == 1:
+                img[markers == i] = [0, 255, 0]
+            else:
+                img[markers == i] = [0, 0, 255]
+
+        # img[markers==-1] = [0,255,0]
+        img[markers == 1] = [255, 255, 0]
+        # img[markers==22] = [255,255,255]
+
+        cv.imshow("original", img)
+
+        pl.imshow(img, cmap="jet")
+        pl.show()
 
         if key == 27:
             break
