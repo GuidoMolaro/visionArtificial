@@ -17,6 +17,7 @@ def main():
     cv.createTrackbar('Thresh', 'Tracks', 100, 255, lam)
     cv.createTrackbar('Dilate', 'Tracks', 20, 100, lam)
     cv.createTrackbar('Erode', 'Tracks', 3, 100, lam)
+    cv.createTrackbar('DilateFg', 'Tracks', 20, 100, lam)
 
     while True:
         key = cv.waitKey(30)
@@ -37,15 +38,18 @@ def main():
         erodeVal = cv.getTrackbarPos('Erode', 'Tracks')
         kernelErode = np.ones((erodeVal, erodeVal), np.uint8)
         fg_eroded = cv.morphologyEx(fg, cv.MORPH_ERODE, kernelErode)
-        fgDilated = cv.morphologyEx(fg_eroded,cv.MORPH_DILATE, kernel)
+
+        dilateVal2 = cv.getTrackbarPos('DilateFg', 'Tracks')
+        kernelFgDilation = np.ones((dilateVal2, dilateVal2), np.uint8)
+        fgDilated = cv.morphologyEx(fg_eroded,cv.MORPH_DILATE, kernelFgDilation)
 
         # dist_transform = cv.distanceTransform(fg_eroded, cv.DIST_L2, 5)
         #ret, sure_fg = cv.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
 
         # Finding unknown region
         unknown = cv.subtract(sure_bg, fgDilated)
-        cv.imshow("sureFg", fgDilated)
-        cv.imshow("subreBg", sure_bg)
+        #cv.imshow("sureFg", fgDilated)
+        #cv.imshow("subreBg", sure_bg)
 
         #Markers
         _, markers = cv.connectedComponents(fgDilated)
