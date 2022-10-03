@@ -61,6 +61,7 @@ def main():
         pl.imshow(markers, cmap="jet")
         pl.show()
 
+        markers = cv.watershed(img, markers)
         for i in np.unique(markers):
             if i % 3 == 0:
                 img[markers == i] = [255, 0, 0]
